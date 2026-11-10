@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: frontend
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - image: ghcr.io/stefanprodan/podinfo:6.17.0
+        name: podinfo
+        env: 
+        - name: PODINFO_BACKEND_URL
+          value: http://backend:9898/echo
+        resources: {}
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: frontend
+  name: frontend
+spec:
+  ports:
+  - name: 9898-9898
+    port: 9898
+    protocol: TCP
+    targetPort: 9898
+    nodePort: 30080
+  selector:
+    app: frontend
+  type: NodePort
+status:
+  loadBalancer: {}
