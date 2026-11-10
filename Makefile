@@ -1,4 +1,4 @@
-.PHONY: up down
+.PHONY: up down list
 
 down:
 		kind delete cluster --name break-fix
@@ -9,3 +9,6 @@ up:
 		kubectl -n lab rollout status deployment/backend --timeout=120s
 		kubectl -n lab rollout status deployment/redis --timeout=120s
 		kubectl -n lab rollout status deployment/frontend --timeout=120s
+
+list:
+		@ls scenarios/k8s
