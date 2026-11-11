@@ -1,4 +1,4 @@
-.PHONY: up down list break require-scenario check
+.PHONY: up down list break require-scenario check reset deploy-namespace
 
 SCENARIO_DIR = scenarios/k8s/$(SCENARIO)
 
@@ -13,16 +13,18 @@ require-scenario:
   					echo "Run 'make list' to see available scenarios.";\
   					exit 1; }
 
+deploy-namespace:
+		kubectl apply -k app/
+		kubectl -n lab rollout status deployment/backend --timeout=120s
+		kubectl -n lab rollout status deployment/redis --timeout=120s
+		kubectl -n lab rollout status deployment/frontend --timeout=120s
 
 down:
 		kind delete cluster --name break-fix
 
 up:
 		kind create cluster --config kind-config.yaml
-		kubectl apply -k app/
-		kubectl -n lab rollout status deployment/backend --timeout=120s
-		kubectl -n lab rollout status deployment/redis --timeout=120s
-		kubectl -n lab rollout status deployment/frontend --timeout=120s
+		$(MAKE) deploy-namespace
 
 list:
 		@ls scenarios/k8s
@@ -32,3 +34,7 @@ break: require-scenario
 
 check: require-scenario
 		@bash $(SCENARIO_DIR)/check.sh
+
+reset:
+		kubectl delete namespace lab --ignore-not-found
+		$(MAKE) deploy-namespace
