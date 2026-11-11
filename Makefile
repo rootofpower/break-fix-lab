@@ -1,6 +1,18 @@
-.PHONY: up down list break require-scenario
+.PHONY: up down list break require-scenario check
 
 SCENARIO_DIR = scenarios/k8s/$(SCENARIO)
+
+require-scenario:
+		@test -n "$(SCENARIO)" || { \
+          			echo "Error: SCENARIO is not set."; \
+          			echo "Usage: make $(MAKECMDGOALS) SCENARIO=<name>"; \
+          			echo "Run 'make list' to see available scenarios."; \
+          			exit 1; }
+		@test -d "$(SCENARIO_DIR)" || { \
+  					echo "Error: SCENARIO '$(SCENARIO)' not found"; \
+  					echo "Run 'make list' to see available scenarios.";\
+  					exit 1; }
+
 
 down:
 		kind delete cluster --name break-fix
@@ -15,16 +27,8 @@ up:
 list:
 		@ls scenarios/k8s
 
-require-scenario:
-		@test -n "$(SCENARIO)" || { \
-          			echo "Error: SCENARIO is not set."; \
-          			echo "Usage: make $(MAKECMDGOALS) SCENARIO=<name>"; \
-          			echo "Run 'make list' to see available scenarios."; \
-          			exit 1; }
-		@test -d "$(SCENARIO_DIR)" || { \
-  					echo "Error: SCENARIO '$(SCENARIO)' not found"; \
-  					echo "Run 'make list' to see available scenarios.";\
-  					exit 1; }
-
 break: require-scenario
 		@bash $(SCENARIO_DIR)/break.sh
+
+check: require-scenario
+		@bash $(SCENARIO_DIR)/check.sh
